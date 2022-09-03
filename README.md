@@ -1,3 +1,3 @@
 # DO280
 github:token
-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
+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
