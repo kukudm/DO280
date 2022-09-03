@@ -1,0 +1,636 @@
+7.
+
+[opsadm@workbench ~]$ oc project bullwinkle
+Now using project "bullwinkle" on server "https://api.domain2.example.com:6443".
+[opsadm@workbench ~]$ oc get all
+NAME                 READY   STATUS    RESTARTS   AGE
+pod/rocky-2-deploy   0/1     Pending   0          34m
+
+NAME                            DESIRED   CURRENT   READY   AGE
+replicationcontroller/rocky-1   0         0         0       34m
+replicationcontroller/rocky-2   0         0         0       34m
+
+NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
+service/rocky   ClusterIP   172.30.46.253   <none>        8080/TCP,8888/TCP   34m
+
+NAME                                       REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfig.apps.openshift.io/rocky   2          1         0         config,image(rocky:latest)
+
+NAME                                   IMAGE REPOSITORY                                                    TAGS     UPDATED
+imagestream.image.openshift.io/rocky   image-registry.openshift-image-registry.svc:5000/bullwinkle/rocky   latest   34 minutes ago
+
+NAME                             HOST/PORT                                   PATH   SERVICES   PORT       TERMINATION   WILDCARD
+route.route.openshift.io/rocky   rocky-bullwinkle.apps.domain2.example.com          rocky      8080-tcp                 None
+[opsadm@workbench ~]$ oc describe deploymentconfig.apps.openshift.io/rocky 
+Name:		rocky
+Namespace:	bullwinkle
+Created:	36 minutes ago
+Labels:		app=rocky
+		app.kubernetes.io/component=rocky
+		app.kubernetes.io/instance=rocky
+Annotations:	openshift.io/generated-by=OpenShiftNewApp
+Latest Version:	2
+Selector:	deploymentconfig=rocky
+Replicas:	1
+Triggers:	Config, Image(rocky@latest, auto=true)
+Strategy:	Rolling
+Template:
+Pod Template:
+  Labels:	deploymentconfig=rocky
+  Annotations:	openshift.io/generated-by: OpenShiftNewApp
+  Containers:
+   rocky:
+    Image:	registry.domain2.example.com/openshift/hello-openshift@sha256:aaea76ff622d2f8bcb32e538e7b3cd0ef6d291953f3e7c9f556c1ba5baf47e2e
+    Ports:	8080/TCP, 8888/TCP
+    Host Ports:	0/TCP, 0/TCP
+    Environment:
+      RESPONSE:	<set to the key 'RESPONSE' of config map 'boris'>	Optional: false
+    Mounts:	<none>
+  Volumes:	<none>
+
+Deployment #2 (latest):
+	Created:	36 minutes ago
+	Status:		Pending
+	Replicas:	0 current / 0 desired
+Deployment #1:
+	Created:	36 minutes ago
+	Status:		Failed
+	Replicas:	0 current / 0 desired
+
+Events:
+  Type		Reason				Age			From			Message
+  ----		------				----			----			-------
+  Normal	DeploymentCreated		36m			deploymentconfig-controller	Created new replication controller "rocky-2" for version 2
+  Normal	RolloutCancelled		36m			deployer-controller	Rollout for "bullwinkle/rocky-1" cancelled
+  Normal	DeploymentAwaitingCancellation	36m (x4 over 36m)	deploymentconfig-controller	Deployment of version 2 awaiting cancellation of older running deployments
+  Normal	DeploymentCancelled		36m			deploymentconfig-controller	Cancelled deployment "rocky-1" superceded by version 2
+  Normal	DeploymentCreated		36m			deploymentconfig-controller	Created new replication controller "rocky-1" for version 1
+[opsadm@workbench ~]$ oc describe po rocky-2-deploy 
+Name:         rocky-2-deploy
+Namespace:    bullwinkle
+Priority:     0
+Node:         <none>
+Labels:       openshift.io/deployer-pod-for.name=rocky-2
+Annotations:  openshift.io/deployment-config.name: rocky
+              openshift.io/deployment.name: rocky-2
+              openshift.io/scc: restricted
+Status:       Pending
+IP:           
+IPs:          <none>
+Containers:
+  deployment:
+    Image:      quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:e98bcac897de51582ee0a86eca72a953274f5c181908dfbc8b37eeced48fbee8
+    Port:       <none>
+    Host Port:  <none>
+    Environment:
+      OPENSHIFT_DEPLOYMENT_NAME:       rocky-2
+      OPENSHIFT_DEPLOYMENT_NAMESPACE:  bullwinkle
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-hkfqw (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False 
+Volumes:
+  kube-api-access-hkfqw:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+    ConfigMapName:           openshift-service-ca.crt
+    ConfigMapOptional:       <nil>
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason            Age                 From               Message
+  ----     ------            ----                ----               -------
+  Warning  FailedScheduling  40m                 default-scheduler  0/5 nodes are available: 2 node(s) had taint {node: worker}, that the pod didn't tolerate, 3 node(s) had taint {node-role.kubernetes.io/master: }, that the pod didn't tolerate.
+  Warning  FailedScheduling  51s (x36 over 39m)  default-scheduler  0/5 nodes are available: 2 node(s) had taint {node: worker}, that the pod didn't tolerate, 3 node(s) had taint {node-role.kubernetes.io/master: }, that the pod didn't tolerate.
+[opsadm@workbench ~]$ oc describe  node worker0.domain2.example.com
+Name:               worker0.domain2.example.com
+Roles:              worker
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=worker0.domain2.example.com
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/worker=
+                    node.openshift.io/os_id=rhcos
+                    star=trek
+Annotations:        machineconfiguration.openshift.io/controlPlaneTopology: HighlyAvailable
+                    machineconfiguration.openshift.io/currentConfig: rendered-worker-a43dea2cdc8ee25f6cac55211539c197
+                    machineconfiguration.openshift.io/desiredConfig: rendered-worker-a43dea2cdc8ee25f6cac55211539c197
+                    machineconfiguration.openshift.io/reason: 
+                    machineconfiguration.openshift.io/state: Done
+                    volumes.kubernetes.io/controller-managed-attach-detach: true
+CreationTimestamp:  Mon, 29 Aug 2022 18:33:46 +0800
+Taints:             node=worker:NoSchedule
+Unschedulable:      false
+
+
+use WEBUI to remove Taints
+[opsadm@workbench ~]$ oc describe  node worker1.domain2.example.com
+Name:               worker1.domain2.example.com
+Roles:              worker
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=worker1.domain2.example.com
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/worker=
+                    node.openshift.io/os_id=rhcos
+                    star=trek
+Annotations:        machineconfiguration.openshift.io/controlPlaneTopology: HighlyAvailable
+                    machineconfiguration.openshift.io/currentConfig: rendered-worker-a43dea2cdc8ee25f6cac55211539c197
+                    machineconfiguration.openshift.io/desiredConfig: rendered-worker-a43dea2cdc8ee25f6cac55211539c197
+                    machineconfiguration.openshift.io/reason: 
+                    machineconfiguration.openshift.io/state: Done
+                    volumes.kubernetes.io/controller-managed-attach-detach: true
+CreationTimestamp:  Mon, 29 Aug 2022 18:33:46 +0800
+Taints:             node=worker:NoSchedule
+Unschedulable:      false
+
+
+[opsadm@workbench ~]$ oc edit  node worker1.domain2.example.com
+  name: worker1.domain2.example.com
+  resourceVersion: "43234"
+  uid: b754b59f-3f8a-48a7-bff8-ef3007cde981
+spec: {}
+status:
+  addresses:
+  - address: 172.24.2.51
+    type: InternalIP
+  - address: worker1.domain2.example.com
+    type: Hostname
+
+[opsadm@workbench ~]$ oc describe  node worker1.domain2.example.com
+
+Taints:             <none>
+Unschedulable:      false
+
+[opsadm@workbench ~]$ oc get all
+NAME                 READY   STATUS      RESTARTS   AGE
+pod/rocky-2-2n57b    1/1     Running     0          16m
+pod/rocky-2-deploy   0/1     Completed   0          60m
+
+NAME                            DESIRED   CURRENT   READY   AGE
+replicationcontroller/rocky-1   0         0         0       60m
+replicationcontroller/rocky-2   1         1         1       60m
+
+NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
+service/rocky   ClusterIP   172.30.46.253   <none>        8080/TCP,8888/TCP   60m
+
+NAME                                       REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfig.apps.openshift.io/rocky   2          1         1         config,image(rocky:latest)
+
+NAME                                   IMAGE REPOSITORY                                                    TAGS     UPDATED
+imagestream.image.openshift.io/rocky   image-registry.openshift-image-registry.svc:5000/bullwinkle/rocky   latest   About an hour ago
+
+NAME                             HOST/PORT                                   PATH   SERVICES   PORT       TERMINATION   WILDCARD
+route.route.openshift.io/rocky   rocky-bullwinkle.apps.domain2.example.com          rocky      8080-tcp                 None
+[opsadm@workbench ~]$ curl rocky-bullwinkle.apps.domain2.example.com
+And now, here's something we hope you'll really like.
+*******************************************************
+
+
+
+8.
+[opsadm@workbench ~]$ oc project gru
+Now using project "gru" on server "https://api.domain2.example.com:6443".
+[opsadm@workbench ~]$ oc get all
+NAME                  READY   STATUS      RESTARTS   AGE
+pod/minion-2-cl8rt    1/1     Running     0          62m
+pod/minion-2-deploy   0/1     Completed   0          62m
+
+NAME                             DESIRED   CURRENT   READY   AGE
+replicationcontroller/minion-1   0         0         0       63m
+replicationcontroller/minion-2   1         1         1       62m
+
+NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
+service/minion   ClusterIP   172.30.177.33   <none>        8080/TCP,8888/TCP   63m
+
+NAME                                        REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfig.apps.openshift.io/minion   2          1         1         config,image(minion:latest)
+
+NAME                                    IMAGE REPOSITORY                                              TAGS     UPDATED
+imagestream.image.openshift.io/minion   image-registry.openshift-image-registry.svc:5000/gru/minion   latest   About an hour ago
+
+NAME                              HOST/PORT                             PATH   SERVICES   PORT       TERMINATION   WILDCARD
+route.route.openshift.io/minion   minion-gru.apps.domain2.example.com          minion     8080-tcp                 None
+[opsadm@workbench ~]$ oc scale --replicas=5 dc/minion 
+Warning: extensions/v1beta1 Scale is deprecated in v1.2+, unavailable in v1.16+
+deploymentconfig.apps.openshift.io/minion scaled
+[opsadm@workbench ~]$ oc get po
+NAME              READY   STATUS      RESTARTS   AGE
+minion-2-72rz9    1/1     Running     0          15s
+minion-2-8x75k    1/1     Running     0          15s
+minion-2-cl8rt    1/1     Running     0          64m
+minion-2-deploy   0/1     Completed   0          64m
+minion-2-hq7zh    1/1     Running     0          15s
+minion-2-xg9kj    1/1     Running     0          15s
+
+
++++++++++++++++++++++++++++++++++++++++++
+10.
+http://rhgls.domain2.example.com/materials/
+
+gencert.sh
+
+
+#!/bin/bash
+# Create certificate given a specific url name
+if [ $# -ne 1 ]
+  then
+    echo "No arguments supplied or too many arguments" 
+    echo "Usage: $0 domain_name"
+    exit 1
+fi
+
+MYNAME=$1
+
+echo "Generating a private key...for $MYNAME"
+openssl genrsa -out $MYNAME.key 2048
+
+echo "Generating a CSR...for $MYNAME"
+openssl req -new -key $MYNAME.key \
+-out $MYNAME.csr \
+-subj "/C=US/ST=NC/L=Raleigh/O=RedHat/OU=RHT/CN=$MYNAME"
+
+echo "Generating a certificate...for $MYNAME"
+openssl x509 -req -days 366 -in \
+$MYNAME.csr -signkey \
+$MYNAME.key \
+-out $MYNAME.crt
+
+
+13.
+[opsadm@workbench ~]$ oc project apples
+Now using project "apples" on server "https://api.domain2.example.com:6443".
+[opsadm@workbench ~]$ oc get all
+NAME                   READY   STATUS   RESTARTS   AGE
+pod/oranges-1-deploy   0/1     Error    0          76m
+
+NAME                              DESIRED   CURRENT   READY   AGE
+replicationcontroller/oranges-1   0         0         0       76m
+
+NAME              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/oranges   ClusterIP   172.30.194.173   <none>        8080/TCP   76m
+
+NAME                                         REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfig.apps.openshift.io/oranges   1          1         0         config,image(oranges:latest)
+
+NAME                                     IMAGE REPOSITORY                                                  TAGS     UPDATED
+imagestream.image.openshift.io/oranges   image-registry.openshift-image-registry.svc:5000/apples/oranges   latest   About an hour ago
+
+NAME                               HOST/PORT                                 PATH   SERVICES   PORT       TERMINATION   WILDCARD
+route.route.openshift.io/oranges   oranges-apples.apps.domain2.example.com          oranges    8080-tcp                 None
+
+
+[opsadm@workbench ~]$ oc create sa ex280sa
+serviceaccount/ex280sa created
+[opsadm@workbench ~]$ oc adm policy add-scc-to-user anyuid -z ex280sa
+clusterrole.rbac.authorization.k8s.io/system:openshift:scc:anyuid added: "ex280sa"
+[opsadm@workbench ~]$ oc set sa dc/oranges ex280sa
+deploymentconfig.apps.openshift.io/oranges serviceaccount updated
+
+[opsadm@workbench ~]$ oc get po
+NAME               READY   STATUS      RESTARTS   AGE
+oranges-1-deploy   0/1     Error       0          85m
+oranges-2-6z5dn    1/1     Running     0          11s
+oranges-2-deploy   0/1     Completed   0          14s
+
+
+one
+[opsadm@workbench ~]$ curl oranges-apples.apps.domain2.example.com
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+[opsadm@workbench ~]$ oc describe svc oranges
+Name:              oranges
+Namespace:         apples
+Labels:            app=oranges
+                   app.kubernetes.io/component=oranges
+                   app.kubernetes.io/instance=oranges
+Annotations:       openshift.io/generated-by: OpenShiftNewApp
+Selector:          deploymentconfig=orange
+Type:              ClusterIP
+IP Family Policy:  SingleStack
+IP Families:       IPv4
+IP:                172.30.194.173
+IPs:               172.30.194.173
+Port:              8080-tcp  8080/TCP
+TargetPort:        8080/TCP
+Endpoints:         <none>
+Session Affinity:  None
+Events:            <none>
+
+[opsadm@workbench ~]$ oc edit  svc oranges
+selector:
+    deploymentconfig: oranges
+
+
+[opsadm@workbench ~]$ oc describe svc oranges
+Name:              oranges
+Namespace:         apples
+Labels:            app=oranges
+                   app.kubernetes.io/component=oranges
+                   app.kubernetes.io/instance=oranges
+Annotations:       openshift.io/generated-by: OpenShiftNewApp
+Selector:          deploymentconfig=oranges
+Type:              ClusterIP
+IP Family Policy:  SingleStack
+IP Families:       IPv4
+IP:                172.30.194.173
+IPs:               172.30.194.173
+Port:              8080-tcp  8080/TCP
+TargetPort:        8080/TCP
+Endpoints:         10.128.2.39:8080
+Session Affinity:  None
+Events:            <none>
+[opsadm@workbench ~]$ curl oranges-apples.apps.domain2.example.com
+There is no comparison
+
+
+15.
+
+[opsadm@workbench ~]$ oc project pathfinder
+Now using project "pathfinder" on server "https://api.domain2.example.com:6443".
+[opsadm@workbench ~]$ oc get all
+ NAME                   READY   STATUS    RESTARTS   AGE
+pod/voyager-2-deploy   0/1     Pending   0          93m
+
+NAME                              DESIRED   CURRENT   READY   AGE
+replicationcontroller/voyager-1   0         0         0       93m
+replicationcontroller/voyager-2   0         0         0       93m
+
+NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
+service/voyager   ClusterIP   172.30.66.220   <none>        8080/TCP,8888/TCP   93m
+
+NAME                                         REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfig.apps.openshift.io/voyager   2          1         0         config,image(voyager:latest)
+
+NAME                                     IMAGE REPOSITORY                                                      TAGS     UPDATED
+imagestream.image.openshift.io/voyager   image-registry.openshift-image-registry.svc:5000/pathfinder/voyager   latest   2 hours ago
+
+NAME                                     HOST/PORT                                    PATH   SERVICES   PORT       TERMINATION   WILDCARD
+route.route.openshift.io/voyager-54sz9   voyager-pathfinder.app.domain2.example.com   /      voyager    8080-tcp                 None
+
+[opsadm@workbench ~]$  oc describe pod/voyager-2-deploy
+Name:         voyager-2-deploy
+Namespace:    pathfinder
+Priority:     0
+Node:         <none>
+Labels:       openshift.io/deployer-pod-for.name=voyager-2
+Annotations:  openshift.io/deployment-config.name: voyager
+              openshift.io/deployment.name: voyager-2
+              openshift.io/scc: restricted
+Status:       Pending
+IP:           
+IPs:          <none>
+Containers:
+  deployment:
+    Image:      quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:e98bcac897de51582ee0a86eca72a953274f5c181908dfbc8b37eeced48fbee8
+    Port:       <none>
+    Host Port:  <none>
+    Environment:
+      OPENSHIFT_DEPLOYMENT_NAME:       voyager-2
+      OPENSHIFT_DEPLOYMENT_NAMESPACE:  pathfinder
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-crn59 (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False 
+Volumes:
+  kube-api-access-crn59:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+    ConfigMapName:           openshift-service-ca.crt
+    ConfigMapOptional:       <nil>
+QoS Class:                   BestEffort
+Node-Selectors:              star=Trek********************
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason            Age                 From               Message
+  ----     ------            ----                ----               -------
+  Warning  FailedScheduling  94m                 default-scheduler  0/5 nodes are available: 2 node(s) didn't match Pod's node affinity/selector, 3 node(s) had taint {node-role.kubernetes.io/master: }, that the pod didn't tolerate.
+  Warning  FailedScheduling  93m                 default-scheduler  0/5 nodes are available: 2 node(s) had taint {node: worker}, that the pod didn't tolerate, 3 node(s) had taint {node-role.kubernetes.io/master: }, that the pod didn't tolerate.
+  Warning  FailedScheduling  50m (x39 over 92m)  default-scheduler  0/5 nodes are available: 2 node(s) had taint {node: worker}, that the pod didn't tolerate, 3 node(s) had taint {node-role.kubernetes.io/master: }, that the pod didn't tolerate.
+  Warning  FailedScheduling  48m (x1 over 49m)   default-scheduler  0/5 nodes are available: 1 node(s) didn't match Pod's node affinity/selector, 1 node(s) had taint {node: worker}, that the pod didn't tolerate, 3 node(s) had taint {node-role.kubernetes.io/master: }, that the pod didn't tolerate.
+  Warning  FailedScheduling  24m (x22 over 47m)  default-scheduler  0/5 nodes are available: 2 node(s) didn't match Pod's node affinity/selector, 3 node(s) had taint {node-role.kubernetes.io/master: }, that the pod didn't tolerate.
+
+[opsadm@workbench ~]$ oc describe nodes worker0.domain2.example.com
+Name:               worker0.domain2.example.com
+Roles:              worker
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=worker0.domain2.example.com
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/worker=
+                    node.openshift.io/os_id=rhcos
+                    star=trek
+[opsadm@workbench ~]$ oc describe nodes worker1.domain2.example.com
+Name:               worker1.domain2.example.com
+Roles:              worker
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=worker1.domain2.example.com
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/worker=
+                    node.openshift.io/os_id=rhcos
+                    star=trek
+
+
+
+[opsadm@workbench ~]$ oc get dc
+NAME      REVISION   DESIRED   CURRENT   TRIGGERED BY
+voyager   2          1         0         config,image(voyager:latest)
+[opsadm@workbench ~]$ oc edit dc/voyager
+
+ nodeSelector:
+        star: trek
+
+[opsadm@workbench ~]$ oc get po
+NAME               READY   STATUS      RESTARTS   AGE
+voyager-3-6pdlf    1/1     Running     0          16s
+voyager-3-deploy   0/1     Completed   0          19s
+
+[opsadm@workbench ~]$ oc delete   route voyager-54sz9
+route.route.openshift.io "voyager-54sz9" deleted
+
+[opsadm@workbench ~]$ oc expose svc voyager
+route.route.openshift.io/voyager exposed
+[opsadm@workbench ~]$ oc get  route 
+NAME            HOST/PORT                                     PATH   SERVICES   PORT       TERMINATION   WILDCARD
+voyager         voyager-pathfinder.apps.domain2.example.com          voyager    8080-tcp                 None
+voyager-2wt6z   voyager-pathfinder.app.domain2.example.com    /      voyager    8080-tcp                 None
+[opsadm@workbench ~]$ curl voyager-pathfinder.apps.domain2.example.com
+I want you all to know we are doing everything we can to bring you home.
+[opsadm@workbench ~]$ curl voyager-pathfinder.app.domain2.example.com
+curl: (6) Could not resolve host: voyager-pathfinder.app.domain2.example.com
+
+16.
+[opsadm@workbench ~]$ oc project mercury
+Now using project "mercury" on server "https://api.domain2.example.com:6443".
+[opsadm@workbench ~]$ oc get all
+NAME                 READY   STATUS   RESTARTS   AGE
+pod/atlas-2-deploy   0/1     Error    0          106m
+
+NAME                            DESIRED   CURRENT   READY   AGE
+replicationcontroller/atlas-1   0         0         0       106m
+replicationcontroller/atlas-2   0         0         0       106m
+
+NAME            TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
+service/atlas   ClusterIP   172.30.145.223   <none>        8080/TCP,8888/TCP   106m
+
+NAME                                       REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfig.apps.openshift.io/atlas   2          1         0         config,image(atlas:latest)
+
+NAME                                   IMAGE REPOSITORY                                                 TAGS     UPDATED
+imagestream.image.openshift.io/atlas   image-registry.openshift-image-registry.svc:5000/mercury/atlas   latest   2 hours ago
+
+NAME                             HOST/PORT                                PATH   SERVICES   PORT       TERMINATION   WILDCARD
+route.route.openshift.io/atlas   atlas-mercury.apps.domain2.example.com          atlas      8080-tcp                 None
+
+
+[opsadm@workbench ~]$ oc describe po atlas-2-deploy
+Name:         atlas-2-deploy
+Namespace:    mercury
+Priority:     0
+Node:         worker0.domain2.example.com/172.24.2.50
+Start Time:   Mon, 29 Aug 2022 19:37:05 +0800
+Labels:       openshift.io/deployer-pod-for.name=atlas-2
+Annotations:  k8s.v1.cni.cncf.io/network-status:
+                [{
+                    "name": "openshift-sdn",
+                    "interface": "eth0",
+                    "ips": [
+                        "10.128.2.29"
+                    ],
+                    "default": true,
+                    "dns": {}
+                }]
+              k8s.v1.cni.cncf.io/networks-status:
+                [{
+                    "name": "openshift-sdn",
+                    "interface": "eth0",
+                    "ips": [
+                        "10.128.2.29"
+                    ],
+                    "default": true,
+                    "dns": {}
+                }]
+              openshift.io/deployment-config.name: atlas
+              openshift.io/deployment.name: atlas-2
+              openshift.io/scc: restricted
+Status:       Failed
+IP:           10.128.2.29
+IPs:
+  IP:  10.128.2.29
+Containers:
+  deployment:
+    Container ID:   cri-o://74ba9ae477b58ff0f09c5190bb44e67c35067d46828733fbeceae3d4c786dbdf
+    Image:          quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:e98bcac897de51582ee0a86eca72a953274f5c181908dfbc8b37eeced48fbee8
+    Image ID:       quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:e98bcac897de51582ee0a86eca72a953274f5c181908dfbc8b37eeced48fbee8
+    Port:           <none>
+    Host Port:      <none>
+    State:          Terminated
+      Reason:       Error
+      Exit Code:    1
+      Started:      Mon, 29 Aug 2022 19:37:09 +0800
+      Finished:     Mon, 29 Aug 2022 19:47:14 +0800
+    Ready:          False
+    Restart Count:  0
+    Environment:
+      OPENSHIFT_DEPLOYMENT_NAME:       atlas-2
+      OPENSHIFT_DEPLOYMENT_NAMESPACE:  mercury
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-882vd (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             False 
+  ContainersReady   False 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-882vd:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+    ConfigMapName:           openshift-service-ca.crt
+    ConfigMapOptional:       <nil>
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason            Age                  From               Message
+  ----     ------            ----                 ----               -------
+  Warning  FailedScheduling  107m                 default-scheduler  0/5 nodes are available: 2 node(s) had taint {node: worker}, that the pod didn't tolerate, 3 node(s) had taint {node-role.kubernetes.io/master: }, that the pod didn't tolerate.
+  Warning  FailedScheduling  63m (x38 over 105m)  default-scheduler  0/5 nodes are available: 2 node(s) had taint {node: worker}, that the pod didn't tolerate, 3 node(s) had taint {node-role.kubernetes.io/master: }, that the pod didn't tolerate.
+  Normal   Scheduled         63m                  default-scheduler  Successfully assigned mercury/atlas-2-deploy to worker0.domain2.example.com
+  Normal   AddedInterface    63m                  multus             Add eth0 [10.128.2.29/23] from openshift-sdn
+  Normal   Pulled            63m                  kubelet            Container image "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:e98bcac897de51582ee0a86eca72a953274f5c181908dfbc8b37eeced48fbee8" already present on machine
+  Normal   Created           63m                  kubelet            Created container deployment
+  Normal   Started           63m                  kubelet            Started container deployment
+
+[opsadm@workbench ~]$ oc describe dc atlas
+Name:		atlas
+Namespace:	mercury
+Created:	2 hours ago
+Labels:		app=atlas
+		app.kubernetes.io/component=atlas
+		app.kubernetes.io/instance=atlas
+Annotations:	openshift.io/generated-by=OpenShiftNewApp
+Latest Version:	2
+Selector:	deploymentconfig=atlas
+Replicas:	1
+Triggers:	Config, Image(atlas@latest, auto=true)
+Strategy:	Rolling
+Template:
+Pod Template:
+  Labels:	deploymentconfig=atlas
+  Annotations:	openshift.io/generated-by: OpenShiftNewApp
+  Containers:
+   atlas:
+    Image:	registry.domain2.example.com/openshift/hello-openshift@sha256:aaea76ff622d2f8bcb32e538e7b3cd0ef6d291953f3e7c9f556c1ba5baf47e2e
+    Ports:	8080/TCP, 8888/TCP
+    Host Ports:	0/TCP, 0/TCP
+    Requests:
+      memory:	80Gi*****************************
+    Environment:
+      RESPONSE:	<set to the key 'RESPONSE' of config map 'nasa'>	Optional: false
+    Mounts:	<none>
+  Volumes:	<none>
+
+
+[opsadm@workbench ~]$ oc edit dc atlas
+        resources:
+          requests:
+            memory: 80Gi
+
+
+------->>>>>
+        resources: {}
+
+
+[opsadm@workbench ~]$ oc get po
+NAME             READY   STATUS      RESTARTS   AGE
+atlas-2-deploy   0/1     Error       0          112m
+atlas-3-deploy   0/1     Completed   0          24s
+atlas-3-m75hm    1/1     Running     0          20s
+[opsadm@workbench ~]$ curl atlas-mercury.apps.domain2.example.com
+Project Mercury was the first human spaceflight program of the United States, running from 1958 through 1963.
+
+
+
