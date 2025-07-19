@@ -1,0 +1,48 @@
+[desktop@host2 ~]$ ll
+total 0
+drwxr-xr-x. 2 desktop desktop 30 Aug 29 18:08 Desktop
+drwxr-xr-x. 3 desktop desktop 17 Aug 29 19:13 Documents
+drwxr-xr-x. 2 desktop desktop  6 Aug 29 19:09 Downloads
+drwxr-xr-x. 2 desktop desktop  6 Aug 29 19:09 Music
+drwxr-xr-x. 2 desktop desktop  6 Aug 29 19:09 Pictures
+drwxr-xr-x. 2 desktop desktop  6 Aug 29 19:09 Public
+drwxr-xr-x. 2 desktop desktop  6 Aug 29 19:09 Templates
+drwxr-xr-x. 2 desktop desktop  6 Aug 29 19:09 Videos
+[desktop@host2 ~]$ ssh opsadm@workbench
+The authenticity of host 'workbench (172.24.2.70)' can't be established.
+ECDSA key fingerprint is SHA256:aSJAsPOZTWSZZ//XYwjnbyemU+z+0W9m7/QtDDFjyuA.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added 'workbench,172.24.2.70' (ECDSA) to the list of known hosts.
+opsadm@workbench's password: 
+Last login: Mon Aug 29 18:50:37 2022
+[opsadm@workbench ~]$ ll
+total 0
+[opsadm@workbench ~]$ oc whoami
+system:admin
+[opsadm@workbench ~]$ oc get nodes
+NAME                          STATUS   ROLES    AGE   VERSION
+master0.domain2.example.com   Ready    master   53m   v1.23.5+9ce5071
+master1.domain2.example.com   Ready    master   53m   v1.23.5+9ce5071
+master2.domain2.example.com   Ready    master   53m   v1.23.5+9ce5071
+worker0.domain2.example.com   Ready    worker   45m   v1.23.5+9ce5071
+worker1.domain2.example.com   Ready    worker   45m   v1.23.5+9ce5071
+[opsadm@workbench ~]$ logout
+Connection to workbench closed.
+[desktop@host2 ~]$ ssh root@workbench
+root@workbench's password: 
+[root@workbench ~]# ll
+total 4
+-rw-r--r--. 1 root root 23 Aug 29 18:50 kubeadmin-password
+[root@workbench ~]# cat kubeadmin-password 
+pDQKP-xw5aM-zMxgq-gXj7r[root@workbench ~]# oc whoami
+system:admin
+[root@workbench ~]# oc get nodes
+NAME                          STATUS   ROLES    AGE   VERSION
+master0.domain2.example.com   Ready    master   54m   v1.23.5+9ce5071
+master1.domain2.example.com   Ready    master   54m   v1.23.5+9ce5071
+master2.domain2.example.com   Ready    master   54m   v1.23.5+9ce5071
+worker0.domain2.example.com   Ready    worker   46m   v1.23.5+9ce5071
+worker1.domain2.example.com   Ready    worker   46m   v1.23.5+9ce5071
+[root@workbench ~]# logout
+Connection to workbench closed.
+

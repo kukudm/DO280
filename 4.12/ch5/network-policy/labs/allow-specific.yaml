@@ -1,0 +1,19 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-specific
+spec:
+  podSelector:
+    matchLabels:
+      deployment: CHANGE_ME
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: CHANGE_ME
+        podSelector:
+          matchLabels:
+            deployment: CHANGE_ME
+      ports:
+      - port: CHANGE_ME
+        protocol: CHANGE_ME

@@ -1,0 +1,302 @@
+ 1.
+	Configure an identity provider
+
+Configure your OpenShift cluster to use an HTPasswd identity provider with the following requirements:
+	The name of the identity provider is: ex280-htpasswd
+	The name of the secret is: ex280-idp-secret
+	The user account armstrong is present and can log in with password indionce
+	The user account collins is present and can log in with password veraster
+	The user account aldrin is present and can log in with password roonkere
+	The user account jobs is present and can log in with password sestiver
+	The user account wozniak is present and can log in with password glegunge
+
+	配置身份提供程序
+
+配置您的 OpenShift 集群，以使用 HTPasswd 身份提供程序，要求如下：
+	身份提供程序的名称为：ex280-htpasswd
+	机密的名称为：ex280-idp-secret
+	用户帐户 armstrong 存在，并且可以使用密码 indionce 登录
+	用户帐户 collins 存在，并且可以使用密码 veraster 登录
+	用户帐户 aldrin 存在，并且可以使用密码 roonkere 登录
+	用户帐户 jobs 存在，并且可以使用密码 sestiver 登录
+	用户帐户 wozniak 存在，并且可以使用密码 glegunge 登录 
+
+2.
+
+	配置集群权限
+
+配置您的 OpenShift 集群，使其满足以下要求：
+	用户帐户 jobs 可以执行集群管理任务
+	用户帐户 wozniak 可以创建项目
+	用户帐户 wozniak 不能执行集群管理任务
+	用户帐户 armstrong 不能创建项目
+	用户帐户 kubeadmin 不存在 
+
+	Configure cluster permissions
+
+Configure your OpenShift cluster to meet the following requirements:
+	The user account jobs can perform cluster administration tasks
+	The user account wozniak can create projects
+	The user account wozniak cannot perform cluster administration tasks
+	The user account armstrong cannot create projects
+	The user account kubeadmin is not present 
+
+
+
+3.
+	Configure project permissions
+
+Configure your OpenShift cluster to meet the following requirements:
+	The following projects exist:
+	apollo
+	manhattan
+	gemini
+	bluebook
+	titan
+	The user account armstrong is an administrator for project apollo and project gemini
+	The user account wozniak can view project titan but not administer or delete it 
+
+
+	配置项目权限
+
+配置您的 OpenShift 集群，使其满足以下要求：
+	存在以下项目：
+	apollo
+	manhattan
+	gemini
+	bluebook
+	titan
+	用户帐户 armstrong 是项目 apollo 和项目 gemini 的管理员
+	用户帐户 wozniak 可以查看项目 titan，但不能管理或删除该项目 
+
+
+
+4.
+	配置组
+
+配置您的 OpenShift 集群，使其满足以下要求：
+	用户帐户 armstrong 是 commander 组的成员
+	用户帐户 collins 是 pilot 组的成员
+	用户帐户 aldrin 是 pilot 组的成员
+	commander 组的成员在 apollo 项目中拥有编辑权限
+	pilot 组的成员在 apollo 项目中拥有查看权限 
+
+	Configure groups
+
+Configure your OpenShift cluster to meet the following requirements:
+	The user account armstrong is a member of the commander group
+	The user account collins is a member of the pilot group
+	The user account aldrin is a member of the pilot group
+	Members of the commander group have edit permission in the apollo project
+	Members of the pilot group have view permission in the apollo project 
+
+5.
+
+
+	Configure quotas
+
+Configure your OpenShift cluster to use quotas in the manhattan project with the following requirements:
+	The name of the ResourceQuota resource is: ex280-quota
+	The amount of memory consumed across all containers may not exceed 1Gi
+	The total amount of CPU usage consumed across all containers may not exceed 2 full cores
+	The maximum number of replication controllers does not exceed 3
+	The maximum number of pods does not exceed 3
+	The maximum number of services does not exceed 6
+
+	配置配额
+
+配置您的 OpenShift 集群，以在 manhattan 项目中使用配额，要求如下：
+	ResourceQuota 资源的名称为：ex280-quota
+	所有容器使用的内存量不可超过 1Gi
+	所有容器使用的 CPU 总量不可超过 2
+	复制控制器的最大数量不超过 3
+	容器集的最大数量不超过 3
+	服务的最大数量不超过 6
+
+
+6.
+
+	配置限制
+
+配置您的 OpenShift 集群，以在 bluebook 项目中使用限制，要求如下：
+	LimitRange 资源的名称为：ex280-limits
+	单个容器集使用的内存量介于 5Mi 和 300Mi 之间
+	单个容器使用的内存量介于 5Mi 和 300Mi 之间，默认请求值为 100Mi
+	单个容器集使用的 CPU 量介于 10m 和 500m 之间
+	单个容器使用的 CPU 量介于 10m 和 500m 之间，默认请求值为 100m
+
+	Configure limits
+
+Configure your OpenShift cluster to use limits in the bluebook project with the following requirements:
+	The name of the LimitRange resource is: ex280-limits
+	The amount of memory consumed by a single pod is between 5Mi and 300Mi
+	The amount of memory consumed by a single container is between 5Mi and 300Mi with a default request value of 100Mi
+	The amount of CPU consumed by a single pod is between 10m and 500m
+	The amount of CPU consumed by a single container is between 10m and 500m with a default request value of 100m
+
+7.
+
+	Deploy an application
+
+Deploy the application called rocky in the bullwinkle project so that the following conditions are true:
+	The application is reachable at the following address:
+
+http://rocky.apps.domain2.example.com
+	The application produces output 
+
+	部署应用
+
+在 bullwinkle 项目中部署名为 rocky 的应用，使其满足以下条件：
+	该应用可以通过以下地址访问：
+
+http://rocky.apps.domain2.example.com
+	该应用生成输出 
+
+
+
+
+8.
+	手动扩展应用
+
+将 gru 项目中的 minion 应用手动扩展为总计 5 个副本。 
+
+
+9.
+	自动扩展应用
+
+自动扩展 lerna 项目中的hydra 应用部署配置，要求如下：
+	最少副本数：6
+	最多副本数：9
+	目标平均 CPU 利用率：60 %
+	容器 CPU 资源请求：25m
+	容器 CPU 资源限制：100m
+
+	Scale an application automatically
+
+Automatically scale the hydra application deployment configuration in the lerna project with the following requirements:
+	Minimum number of replicas: 6
+	Maximum number of replicas: 9
+	Target average CPU utilization: 60 percent
+	Container CPU resource request: 25m
+	Container CPU resource limit: 100m
+
+
+10.
+	Configure a secure route
+
+Configure the oxcart application in the area51 project with the following requirements:
+	The application uses a route called oxcart
+	The application uses a CA signed certificate with the following subject fields:
+
+/C=US/ST=NV/L=Hiko/O=CIA/OU=USAF/CN=classified.apps.domain2.example.com
+	The application is reachable only at the following address:
+
+https://classified.apps.domain2.example.com
+	The application produces output
+
+A utility script called newcert has been provided to create the CA signed certificate. You may enter the certificate parameters manually or pass the subject as a parameter.
+
+Your certificate signing request will be uploaded to the CA where it will immediately be signed and then downloaded to your current directory. 
+
+
+
+	配置安全路由
+
+按照以下要求在 area51 项目中配置 oxcart 应用：
+	该应用使用名为 oxcart 的路由
+	该应用使用 CA 签名证书以及以下主题字段：
+
+/C=US/ST=NV/L=Hiko/O=CIA/OU=USAF/CN=classified.apps.domain2.example.com
+	该应用只能通过以下地址访问：
+
+https://classified.apps.domain2.example.com
+	该应用生成输出
+
+已提供名为 newcert 的实用程序脚本来创建 CA 签名证书。您可以手动输入证书参数，或者作为参数传递主题。
+
+您的证书签名请求将上传至 CA 并在 CA 中立即获得签名，然后下载到您的当前目录。 
+
+
+11.
+
+	配置机密
+
+在 math 项目中配置机密，要求如下：
+	机密的名称为：magic
+	机密定义一个名为 decoder_ring 的密钥
+	机密定义一个值为 XpWy9KdcP3Tr9FFHGQgZgVRCKukQdrQsbcl0c2ZYhDk= 的密钥 
+
+
+	Configure a secret
+
+Configure a secret in the math project with the following requirements:
+	The name of the secret is: magic
+	The secret defines a key with name: decoder_ring
+	The secret defines the key with value: XpWy9KdcP3Tr9FFHGQgZgVRCKukQdrQsbcl0c2ZYhDk=
+
+
+
+12
+
+	Configure an application to use a secret
+
+Configure the application called qed in the math project with the following requirements:
+	The application uses the secret previously created called: magic
+	The secret defines an environment variable with name: DECODER_RING
+	The application output no longer displays: Sorry, application is not configured correctly.
+
+	配置应用以使用机密
+
+在 math 项目中配置名为 qed 的应用，要求如下：
+	该应用使用之前创建的名为 magic 的机密
+	机密定义一个名为 DECODER_RING 的环境变量
+	应用输出不再显示：Sorry, application is not configured correctly.
+
+
+13.
+	配置服务帐户
+
+在 apples 项目中配置服务帐户，使其满足以下要求：
+	帐户名称为 ex280sa
+	帐户允许以任何可用用户身份运行容器集 
+
+	Configure a service account
+
+Configure a service account in the apples project to meet the following requirements:
+	The name of the account is ex280sa
+	The account allows pods to be run as any available user 
+
+
+14.
+	Deploy an application
+
+Deploy the application called oranges in the apples project so that the following conditions are true:
+	The application uses the ex280sa service account
+	No additional configuration components have been added or removed
+	The application produces output
+
+
+
+
+15
+	Deploy an application
+
+Deploy the application called voyager in the pathfinder project so that the following conditions are true:
+	No configuration components have been added or removed
+	The application produces output 
+
+
+
+16
+	Deploy an application
+
+Deploy the application called atlas in the mercury project so that the following conditions are true:
+	No configuration components have been added or removed
+	The application produces output 
+
+
+
+
+
+
+

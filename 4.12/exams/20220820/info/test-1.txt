@@ -1,0 +1,321 @@
+[student@workstation ~]$ htpasswd -B -b -c Music/htpasswd armstrong indionce
+Adding password for user armstrong
+[student@workstation ~]$ htpasswd -B -b Music/htpasswd collins veraster
+Adding password for user collins
+[student@workstation ~]$ htpasswd -B -b Music/htpasswd aldrin roonkere
+Adding password for user aldrin
+[student@workstation ~]$ htpasswd -B -b Music/htpasswd jobs sestiver
+Adding password for user jobs
+[student@workstation ~]$ htpasswd -B -b Music/htpasswd wozniak glegunge
+Adding password for user wozniak
+
+
+[student@workstation ~]$ oc --kubeconfig=auth/kubeconfig create secret generic test-idp-secret --from-file htpasswd=Music/htpasswd -n openshift-config
+secret/test-idp-secret created
+
+[student@workstation ~]$ oc --kubeconfig=auth/kubeconfig get secret  -n openshift-config
+NAME                                      TYPE                                  DATA   AGE
+builder-dockercfg-lks6d                   kubernetes.io/dockercfg               1      22d
+builder-token-bw2h6                       kubernetes.io/service-account-token   4      22d
+builder-token-ndr59                       kubernetes.io/service-account-token   4      22d
+classroom-tls                             kubernetes.io/tls                     2      22d
+default-dockercfg-mbtml                   kubernetes.io/dockercfg               1      22d
+default-token-chts2                       kubernetes.io/service-account-token   4      22d
+default-token-t825t                       kubernetes.io/service-account-token   4      22d
+deployer-dockercfg-285qk                  kubernetes.io/dockercfg               1      22d
+deployer-token-5jdjq                      kubernetes.io/service-account-token   4      22d
+deployer-token-vzzxt                      kubernetes.io/service-account-token   4      22d
+etcd-client                               kubernetes.io/tls                     2      22d
+etcd-metric-client                        kubernetes.io/tls                     2      22d
+etcd-metric-signer                        kubernetes.io/tls                     2      22d
+etcd-signer                               kubernetes.io/tls                     2      22d
+htpasswd-secret                           Opaque                                1      22d
+initial-service-account-private-key       Opaque                                1      22d
+pull-secret                               kubernetes.io/dockerconfigjson        1      22d
+test-idp-secret                           Opaque                                1      41s
+[student@workstation ~]$ oc --kubeconfig=auth/kubeconfig describe secret test-idp-secret  -n openshift-config
+Name:         test-idp-secret
+Namespace:    openshift-config
+Labels:       <none>
+Annotations:  <none>
+
+Type:  Opaque
+
+Data
+====
+htpasswd:  343 bytes
+
+
+[student@workstation ~]$ oc --kubeconfig=auth/kubeconfig get oauth cluster -o yaml > oauth.yaml
+[student@workstation ~]$ vim oauth.yaml
+
+
+
+
+spec:
+  identityProviders:
+  - htpasswd:
+      fileData:
+        name: test-idp-secret
+    mappingMethod: claim
+    name: test-htpasswd
+    type: HTPasswd
+
+[student@workstation ~]$ oc --kubeconfig=auth/kubeconfig replace -f oauth.yaml 
+oauth.config.openshift.io/cluster replaced
+
+[student@workstation ~]$ oc --kubeconfig=auth/kubeconfig get po -n openshift-authentication
+NAME                               READY   STATUS    RESTARTS   AGE
+oauth-openshift-656cbddb57-dzcwp   1/1     Running   1          22d
+oauth-openshift-656cbddb57-kqcsm   1/1     Running   1          22d
+oauth-openshift-656cbddb57-nqhj4   1/1     Running   1          22d
+
+[student@workstation ~]$ oc --kubeconfig=auth/kubeconfig get po -n openshift-authentication
+NAME                               READY   STATUS    RESTARTS   AGE
+oauth-openshift-656cbddb57-dzcwp   1/1     Running   1          22d
+oauth-openshift-656cbddb57-nqhj4   1/1     Running   1          22d
+oauth-openshift-688c664b77-qzlpm   0/1     Pending   0          26s
+
+[student@workstation ~]$ oc --kubeconfig=auth/kubeconfig get po -n openshift-authentication
+NAME                               READY   STATUS    RESTARTS   AGE
+oauth-openshift-688c664b77-j2vh8   1/1     Running   0          42s
+oauth-openshift-688c664b77-kgxg5   1/1     Running   0          71s
+oauth-openshift-688c664b77-qzlpm   1/1     Running   0          101s
+
+
+
+
+
+[student@workstation ~]$ oc --kubeconfig=auth/kubeconfig adm policy add-cluster-role-to-user cluster-admin jobs
+Warning: User 'jobs' not found
+clusterrole.rbac.authorization.k8s.io/cluster-admin added: "jobs"
+
+
+[student@workstation ~]$ oc login -u jobs -p sestiver https://api.ocp4.example.com:6443
+Login successful.
+
+You have access to 66 projects, the list has been suppressed. You can list all projects with 'oc projects'
+
+Using project "default".
+Welcome! See 'oc help' to get started.
+[student@workstation ~]$ oc whoami
+jobs
+[student@workstation ~]$ oc get nodes
+NAME       STATUS   ROLES           AGE   VERSION
+master01   Ready    master,worker   22d   v1.23.3+e419edf
+master02   Ready    master,worker   22d   v1.23.3+e419edf
+master03   Ready    master,worker   22d   v1.23.3+e419edf
+
+
+oc adm policy remove-cluster-role-from-group self-provisioner system:authenticated:oauth
+[student@workstation ~]$ oc adm policy remove-cluster-role-from-group self-provisioner system:authenticated:oauth
+Warning: Your changes may get lost whenever a master is restarted, unless you prevent reconciliation of this rolebinding using the following command: oc annotate clusterrolebinding.rbac self-provisioners 'rbac.authorization.kubernetes.io/autoupdate=false' --overwrite
+clusterrole.rbac.authorization.k8s.io/self-provisioner removed: "system:authenticated:oauth"
+
+[student@workstation ~]$ oc --kubeconfig=auth/kubeconfig adm policy add-cluster-role-to-user self-provisioner wozniak
+Warning: User 'wozniak' not found
+clusterrole.rbac.authorization.k8s.io/self-provisioner added: "wozniak"
+
+[student@workstation ~]$ oc login -u wozniak -p glegunge
+Login successful.
+
+You don't have any projects. You can try to create a new project, by running
+
+    oc new-project <projectname>
+
+[student@workstation ~]$ oc new-project kungli
+Now using project "kungli" on server "https://api.ocp4.example.com:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+[student@workstation ~]$ oc delete project kungli
+project.project.openshift.io "kungli" deleted
+
+
+[student@workstation ~]$ oc login -u armstrong -p indionce
+Login successful.
+
+You don't have any projects. Contact your system administrator to request a project.
+[student@workstation ~]$ oc new-project lll
+Error from server (Forbidden): You may not request a new project via this API.
+[student@workstation ~]$ oc login -u jobs -p sestiver https://api.ocp4.example.com:6443
+Login successful.
+
+You have access to 66 projects, the list has been suppressed. You can list all projects with 'oc projects'
+
+Using project "default".
+[student@workstation ~]$ oc delete secret kubeadmin -n kube-system
+secret "kubeadmin" deleted
+
+
+
+
+[student@workstation ~]$ oc new-project apollo
+Now using project "apollo" on server "https://api.ocp4.example.com:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app rails-postgresql-example
+
+to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=k8s.gcr.io/e2e-test-images/agnhost:2.33 -- /agnhost serve-hostname
+
+[student@workstation ~]$ oc new-project manhattan
+Now using project "manhattan" on server "https://api.ocp4.example.com:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app rails-postgresql-example
+
+to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=k8s.gcr.io/e2e-test-images/agnhost:2.33 -- /agnhost serve-hostname
+
+[student@workstation ~]$ oc new-project gemimi
+Now using project "gemimi" on server "https://api.ocp4.example.com:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app rails-postgresql-example
+
+to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=k8s.gcr.io/e2e-test-images/agnhost:2.33 -- /agnhost serve-hostname
+
+[student@workstation ~]$ oc new-project gemini
+Now using project "gemini" on server "https://api.ocp4.example.com:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app rails-postgresql-example
+
+to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=k8s.gcr.io/e2e-test-images/agnhost:2.33 -- /agnhost serve-hostname
+
+[student@workstation ~]$ oc new-project bluebook
+Now using project "bluebook" on server "https://api.ocp4.example.com:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app rails-postgresql-example
+
+to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=k8s.gcr.io/e2e-test-images/agnhost:2.33 -- /agnhost serve-hostname
+
+[student@workstation ~]$ oc new-project titan
+Now using project "titan" on server "https://api.ocp4.example.com:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app rails-postgresql-example
+
+to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=k8s.gcr.io/e2e-test-images/agnhost:2.33 -- /agnhost serve-hostname
+
+[student@workstation ~]$ oc policy add-role-to-user admin armstrong -n gemini
+clusterrole.rbac.authorization.k8s.io/admin added: "armstrong"
+[student@workstation ~]$ oc policy add-role-to-user admin armstrong -n apollo
+clusterrole.rbac.authorization.k8s.io/admin added: "armstrong"
+[student@workstation ~]$ oc policy add-role-to-user view wozniak -n titan
+clusterrole.rbac.authorization.k8s.io/view added: "wozniak"
+
+
+
+
+----------
+[student@workstation ~]$ oc adm groups add-users  pilot collins
+group.user.openshift.io/pilot added: "collins"
+[student@workstation ~]$ oc adm groups add-users commander armstrong
+group.user.openshift.io/commander added: "armstrong"
+[student@workstation ~]$ oc adm groups add-users  pilot aldrin
+group.user.openshift.io/pilot added: "aldrin"
+
+[student@workstation ~]$ oc policy add-role-to-group edit commander -n apollo
+clusterrole.rbac.authorization.k8s.io/edit added: "commander"
+
+[student@workstation ~]$ oc policy add-role-to-group view pilot -n apollo
+clusterrole.rbac.authorization.k8s.io/view added: "pilot"
+
+
+
+--------------------------------------
+[student@workstation ~]$ oc get route -n openshift-console
+NAME        HOST/PORT                                           PATH   SERVICES    PORT    TERMINATION          WILDCARD
+console     console-openshift-console.apps.ocp4.example.com            console     https   reencrypt/Redirect   None
+downloads   downloads-openshift-console.apps.ocp4.example.com          downloads   http    edge/Redirect        None
+
+login web console as jobs:sestiver
+.
+
+
+-------------------------
+[student@workstation ~]$ oc create quota test-quota --hard replicationcontrollers=3,pods=3,services=6,cpu=2,memory=1Gi -n manhattan
+resourcequota/test-quota created
+[student@workstation ~]$ oc get quota -n manhattan
+NAME         AGE   REQUEST                                                                          LIMIT
+test-quota   13s   cpu: 0/2, memory: 0/1Gi, pods: 0/3, replicationcontrollers: 0/3, services: 0/6 
+
+
+-----------------------------
+apiVersion: "v1"
+kind: "LimitRange"
+metadata:
+  name: "test-limits"
+spec:
+  limits:
+    - type: "Pod"
+      max:
+        cpu: "500m"
+        memory: "300Mi"
+      min:
+        cpu: "10m"
+        memory: "5Mi"
+    - type: "Container"
+      max:
+        cpu: "500m"
+        memory: "300Mi"
+      min:
+        cpu: "10m"
+        memory: "5Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "100Mi"
+
+
+[student@workstation ~]$ vim limit.yaml
+[student@workstation ~]$ oc create -f limit.yaml -n bluebook
+limitrange/test-limits created
+[student@workstation ~]$ oc get limit -n bluebook
+error: the server doesn't have a resource type "limit"
+[student@workstation ~]$ oc get limitrange -n bluebook
+NAME          CREATED AT
+test-limits   2022-08-20T05:20:35Z
+[student@workstation ~]$ oc describe  limitrange test-limits -n bluebook
+Name:       test-limits
+Namespace:  bluebook
+Type        Resource  Min  Max    Default Request  Default Limit  Max Limit/Request Ratio
+----        --------  ---  ---    ---------------  -------------  -----------------------
+Pod         cpu       10m  500m   -                -              -
+Pod         memory    5Mi  300Mi  -                -              -
+Container   cpu       10m  500m   100m             500m           -
+Container   memory    5Mi  300Mi  100Mi            300Mi          -
+
+
+
+P.143
+network-ingress
+create v1-app
+service on 8080/tcp
+
+self-signed key
+create eaged and TLS route to a unencrypted application
+
+oc create route edge --service=oxcart --hostname=classified.apps.xyz01.local --key=classified.apps.xyz01.local.key  --cert=classified.apps.xyz01.local.crt
+
+
+
+
