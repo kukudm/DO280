@@ -1,8 +1,0 @@
-## Run the following commands to intercept the traffic on your workstation.
-* Refresh the web page to capture some data
-
-* To retrieve the name of the main interface, run the following command:
-ip addr | grep 172.25.250.9
-
-## Tcpdump command
-sudo tcpdump -i eth0 -A -n port 80 | grep "angular"

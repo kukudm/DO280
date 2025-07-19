@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+
+echo [login] admin
+oc login -u admin -p redhatocp https://api.ocp4.example.com:6443
+
+echo [login] done ...

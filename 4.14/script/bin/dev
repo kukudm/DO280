@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+
+echo [login] developer
+oc login -u developer -p developer https://api.ocp4.example.com:6443
+
+echo [done] developer ....
